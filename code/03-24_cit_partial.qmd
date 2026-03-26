@@ -311,6 +311,8 @@ cit_grid_result <- tune_sim_anneal(
   param_info   = cit_param,
   iter         = 50
 )
+cit_grid_result$.metrics[[2]]
+
 ```
 Notice how we have a column for iterations.  
 The first iteration uses a sensible value for the hyper-parameters, and then starts "walking" the parameter space in the direction of greatest improvement.  
@@ -359,7 +361,9 @@ cit_grid_result %>%
 
 ```{r}
 # Based on lowest RMSE
-best_rmse <- cit_grid_result 
+best_rmse <- cit_grid_result %>%
+  select_by_one_std_err("tree_depth",
+                        metric = "rmse")
 
 best_rmse
 
@@ -367,7 +371,9 @@ best_rmse
 
 ```{r}
 # Based on greatest R2
-best_r2 <- cit_grid_result 
+best_r2 <- cit_grid_result %>%
+  select_by_one_std_err("tree_depth",
+                        metric = "rsq")
 
 best_r2
 
@@ -481,7 +487,11 @@ final_spec %>%
 Tree:  
 
 ```{r}
-
+final_spec %>%
+  fit(strength_gtex ~.,
+      data = bake(weather_prep, weather_train)) %>%
+  .$fit %>%
+  plot()
   
 ```
 
@@ -504,6 +514,7 @@ In this exercise, we covered:
   - Used 10-fold cross validation as the resampling method  
   - Used both R2 and RMSE as the metrics to select best model  
   - Once final model was determined, used it to predict **test set**  
-  - Evaluated it with predicted vs. observed plot, R2 and RMSE metrics, variable importance, and tree plot    
+  - Evaluated it with predicted vs. observed plot, R2 and RMSE metrics, variable importance, and tree plot   
+  exM QUESTION WILL BE FROM PROS AND CONS OF THIS
   
 
